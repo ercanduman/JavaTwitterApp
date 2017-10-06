@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import twitter4j.Paging;
@@ -25,8 +27,30 @@ public class MainActivity {
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
         twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
 
+//        currentUserTimeline();
+        otherUserTimeline(Constants.userTwittterID);
+    }
+
+    private static void otherUserTimeline(String userTwitterId) {
+        Paging paging = new Paging(1, 5);
+        List<Status> statuses = new ArrayList();
         try {
-            ResponseList<Status> statuses = twitter.getUserTimeline(new Paging(1, 5));
+            statuses.addAll(twitter.getUserTimeline(userTwitterId, paging));
+            String currUser = twitter.verifyCredentials().getScreenName();
+            System.out.println(currUser + "'s timeline is showing!");
+            for (int i = 0; i < 5; i++) {
+                System.out.println(i + 1 + " -- " + statuses.get(i).getText() + "\t CREATED TIME: " + statuses.get(i).getCreatedAt());
+            }
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // If there is no userid input,then the accesstoken owner id will be shown here
+    public static void currentUserTimeline() {
+        Paging paging = new Paging(1, 5);
+        try {
+            ResponseList<Status> statuses = twitter.getUserTimeline(paging);
             String currUser = twitter.verifyCredentials().getScreenName();
             System.out.println(currUser + "'s timeline is showing!");
 
@@ -64,7 +88,6 @@ public class MainActivity {
             }
         }
     }
-
 }
 
 
