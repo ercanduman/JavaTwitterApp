@@ -28,18 +28,22 @@ public class MainActivity {
         twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
 
 //        currentUserTimeline();
-        otherUserTimeline(Constants.userTwittterID);
+        otherUserTimeline(Constants.USERTWITTERID);
     }
 
     private static void otherUserTimeline(String userTwitterId) {
-        Paging paging = new Paging(1, 5);
+        Paging paging = new Paging(1, 2); // id, user_id, tweet, create_date
         List<Status> statuses = new ArrayList();
         try {
             statuses.addAll(twitter.getUserTimeline(userTwitterId, paging));
             String currUser = twitter.verifyCredentials().getScreenName();
             System.out.println(currUser + "'s timeline is showing!");
-            for (int i = 0; i < 5; i++) {
-                System.out.println(i + 1 + " -- " + statuses.get(i).getText() + "\t CREATED TIME: " + statuses.get(i).getCreatedAt());
+            for (int i = 0; i < 2; i++) {
+                System.out.println(i + 1 +
+                            "\n ID:\t" + statuses.get(i).getId() +
+                            "\n USER_ID:\t" + currUser +
+                            "\n TEXT:\t" + statuses.get(i).getText() +
+                            "\n CREATED_AT:\t" + statuses.get(i).getCreatedAt());
             }
         } catch (TwitterException e) {
             e.printStackTrace();
@@ -64,7 +68,7 @@ public class MainActivity {
     }
 
     private static void getCredentials() {
-        File file = new File("java/libs/twitter4j.properties");
+        File file = new File(Constants.PROPERTIES_PATHNAME);
         Properties properties = new Properties();
         InputStream inputStream = null;
         try {
@@ -72,10 +76,10 @@ public class MainActivity {
                 inputStream = new FileInputStream(file);
                 properties.load(inputStream);
 
-                accessToken = properties.getProperty("oauth.accessToken");
-                accessTokenSecret = properties.getProperty("oauth.accessTokenSecret");
-                consumerKey = properties.getProperty("oauth.consumerKey");
-                consumerSecret = properties.getProperty("oauth.consumerSecret");
+                accessToken = properties.getProperty(Constants.OAUTH_ACCESS_TOKEN);
+                accessTokenSecret = properties.getProperty(Constants.OAUTH_ACCESS_TOKEN_SECRET);
+                consumerKey = properties.getProperty(Constants.OAUTH_CONSUMER_KEY);
+                consumerSecret = properties.getProperty(Constants.OAUTH_CONSUMER_SECRET);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
