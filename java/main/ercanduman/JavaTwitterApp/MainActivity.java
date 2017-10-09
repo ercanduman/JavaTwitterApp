@@ -18,7 +18,7 @@ import twitter4j.auth.AccessToken;
 public class MainActivity {
     private static String accessToken, accessTokenSecret, consumerKey, consumerSecret;
     private static Twitter twitter;
-    static DatabaseHandler db;
+    private static DatabaseHandler db;
 
     public static void main(String[] strings) {
         getCredentials();
@@ -27,45 +27,39 @@ public class MainActivity {
         twitter.setOAuthConsumer(consumerKey, consumerSecret);
         twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
         db = new DatabaseHandler();
-        if (db.establishConnection())
-            db.executeSQLSEARCH("2");
+        if (DatabaseHandler.establishConnection())
+            DatabaseHandler.executeSQLSEARCH(Constants.USER_ID);
 
         String username = Constants.USERNAME;
         if (username != null)
-            otherUserTimeline(username);
-        else System.out.println("USERNAME not found! Please check input id value!");
+            checkUserTimeline(username);
+        else {
+            System.out.println("\nERROR> USERNAME not found! Please check input USER_ID value!");
+        }
     }
 
-    private static void otherUserTimeline(String userTwitterId) {
+    private static void checkUserTimeline(String userTwitterId) {
         System.out.println("\nINFO> Twitter API execution started!");
         Paging paging = new Paging(1, 1);
         List<Status> statuses = new ArrayList();
         String username, tweet_id, tweet_data, created_date;
-
+        String LAST_TWEET_ID;
         try {
             statuses.addAll(twitter.getUserTimeline(userTwitterId, paging));
-            String currUser = twitter.verifyCredentials().getScreenName();
+            username = Constants.USERNAME;
             for (int i = 0; i < paging.getCount(); i++) {
-                username = currUser;
                 tweet_id = String.valueOf(statuses.get(i).getId());
 
                 tweet_data = statuses.get(i).getText();
                 created_date = String.valueOf(statuses.get(i).getCreatedAt());
 
-/*                System.out.println("\nINFO> " + (i + 1) +
-                            "\n ID:\t" + tweet_id +
-                            "\n USER_ID:\t" + username +
-                            "\n TEXT:\t" + tweet_data +
-                            "\n CREATED_AT:\t" + created_date);*/
-                if (db.establishConnection()) {
-                    if ((Constants.LAST_TWEET_ID.equals(tweet_id.toString()))) {
-//                        Constants.LAST_TWEET_ID = tweet_id;
-                        System.out.println("\nINFO> Constants.LAST_TWEET_ID #" + Constants.LAST_TWEET_ID + "#");
-                        System.out.println("\nINFO> tweet_id #" + tweet_id + "#");
-//                        db.executeSQLINSERT(username, tweet_id, tweet_data, String.valueOf(created_date));
-                    } else
-                        System.out.println("\nINFO> NO NEW tweet published!");
-
+                if (DatabaseHandler.establishConnection()) {
+                    LAST_TWEET_ID = db.getLatestTweetID(username);
+                    if (LAST_TWEET_ID == null || !(LAST_TWEET_ID.equals(tweet_id))) {
+                        db.executeSQLINSERT(username, tweet_id, tweet_data, String.valueOf(created_date), Constants.USER_ID);
+                    } else {
+                        System.out.println("\nINFO> No NEW tweets found!");
+                    }
                 }
             }
         } catch (TwitterException e) {

@@ -25,11 +25,11 @@ class DatabaseHandler {
             return true;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            System.out.println("Driver loading failed!...");
+            System.out.println("\nERROR> Database driver loading failed!...");
             return false;
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Error occured while working on SQL!...");
+            System.out.println("\nERROR> Error occured while working on SQL!...");
             return false;
         }
     }
@@ -53,23 +53,61 @@ class DatabaseHandler {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("\nINFO> Error occured while working on SEARCH SQL!...");
+            System.out.println("\nERROR> Error occured while working on SEARCH SQL!...");
         } finally {
-            if (connection != null) try {
+            closeConnection();
+        }
+    }
+
+    String getLatestTweetID(String username) {
+        String LAST_TWEET_ID = null;
+        if (username != null) {
+            //get the latest tweet id from db for given username
+            try {
+                PreparedStatement statement = connection.prepareStatement(Constants.SEARCH_TWEETID_SQL);
+                statement.setString(1, username);
+
+                int resultCont = statement.executeUpdate();
+                if (resultCont > 0) {
+                    resultSet = statement.executeQuery();
+                    int i = 0;
+                    while (resultSet.next()) {
+                        i++;
+                        // Set tweet id
+                        LAST_TWEET_ID = resultSet.getString(i);
+                        System.out.println("\nINFO> LAST_TWEET_ID: " + LAST_TWEET_ID);
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.out.println("\nERROR> Error occured while working on SEARCH SQL!...");
+            }
+        } else {
+            System.out.println("\nERROR> USERNAME not found! Please check input ID value!");
+        }
+        return LAST_TWEET_ID;
+    }
+
+    private static void closeConnection() {
+        if (connection != null) {
+            try {
                 connection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            if (resultSet != null) try {
+        }
+        if (resultSet != null) {
+            try {
                 resultSet.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+        System.out.println("\nINFO> Database Connection Closed!");
     }
 
     //insert values into database table user_id, tweet_id, tweet_data, create_date
-    void executeSQLINSERT(String username, String tweet_id, String tweet_data, String created_date) {
+    void executeSQLINSERT(String username, String tweet_id, String tweet_data, String created_date, String user_id) {
         try {
             PreparedStatement statement = connection.prepareStatement(Constants.INSERT_SQL);
 
@@ -77,26 +115,20 @@ class DatabaseHandler {
             statement.setString(2, tweet_id);
             statement.setString(3, tweet_data);
             statement.setString(4, created_date);
+            statement.setString(5, user_id);
 
             int resultCount = statement.executeUpdate();
             if (resultCount > 0)
                 System.out.println("INFO> " + resultCount + " Row(s) " + "Inserted!");
-            else System.out.println("\nINFO> No Rows INSERTED!");
+            else {
+                System.out.println("\nINFO> No Rows INSERTED!");
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("\nINFO> Error occured while working on INSERT SQL!...");
+            System.out.println("\nERROR> Error occured while working on INSERT SQL!...");
         } finally {
-            if (connection != null) try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            if (resultSet != null) try {
-                resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            closeConnection();
         }
     }
 }
