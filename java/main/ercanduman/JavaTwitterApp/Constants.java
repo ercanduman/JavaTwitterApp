@@ -5,10 +5,13 @@ package ercanduman.JavaTwitterApp;
  */
 class Constants {
 
-    // TWITTER CONSTANTS
-    static String USER_ID = "1";   //1: "ercanistd", 2: "bbcturkce"// user_id in database eduman.twitter_users table
-    static String USERNAME;
+    // APP RUN CONSTANTS
+    static String DB_USER_ID = "2"; //(1: "ercanistd", 2: "bbcturkce") ->(user_id in database eduman.twitter_users)
+    static boolean RUN_APP = true; //(true, false)
+    static int INTERVAL = 1; // (in minute)
 
+    // TWITTER CONSTANTS
+    static String USERNAME;
     static final String OAUTH_ACCESS_TOKEN = "oauth.accessToken";
     static final String OAUTH_ACCESS_TOKEN_SECRET = "oauth.accessTokenSecret";
     static final String OAUTH_CONSUMER_KEY = "oauth.consumerKey";

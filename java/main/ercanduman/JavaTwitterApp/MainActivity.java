@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -21,6 +22,27 @@ public class MainActivity {
     private static DatabaseHandler db;
 
     public static void main(String[] strings) {
+        int i = 0;
+
+        // all app running configurations applied here
+        while (Constants.RUN_APP) {
+            i++;
+            System.out.println("\n***************************************** ");
+            System.out.println("INFO> " + i + ".RUN TIME: " + Instant.now());
+
+            run(Constants.DB_USER_ID);
+            try {
+                Thread.sleep(Constants.INTERVAL * (60 * 1000));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("\n***************************************** ");
+        System.out.println("INFO> App Execution not started!");
+
+    }
+
+    private static void run(String userId) {
         getCredentials();
 
         twitter = new TwitterFactory().getInstance();
@@ -28,13 +50,13 @@ public class MainActivity {
         twitter.setOAuthAccessToken(new AccessToken(accessToken, accessTokenSecret));
         db = new DatabaseHandler();
         if (DatabaseHandler.establishConnection())
-            DatabaseHandler.executeSQLSEARCH(Constants.USER_ID);
+            DatabaseHandler.executeSQLSEARCH(userId);
 
         String username = Constants.USERNAME;
         if (username != null)
             checkUserTimeline(username);
         else {
-            System.out.println("\nERROR> USERNAME not found! Please check input USER_ID value!");
+            System.out.println("\nERROR> USERNAME not found! Please check input DB_USER_ID value!");
         }
     }
 
@@ -56,7 +78,7 @@ public class MainActivity {
                 if (DatabaseHandler.establishConnection()) {
                     LAST_TWEET_ID = db.getLatestTweetID(username);
                     if (LAST_TWEET_ID == null || !(LAST_TWEET_ID.equals(tweet_id))) {
-                        db.executeSQLINSERT(username, tweet_id, tweet_data, String.valueOf(created_date), Constants.USER_ID);
+                        db.executeSQLINSERT(username, tweet_id, tweet_data, String.valueOf(created_date), Constants.DB_USER_ID);
                     } else {
                         System.out.println("\nINFO> No NEW tweets found!");
                     }
@@ -89,6 +111,7 @@ public class MainActivity {
                 try {
                     inputStream.close();
                 } catch (IOException ignore) {
+                    ignore.printStackTrace();
                 }
             }
         }
