@@ -98,4 +98,6 @@ For twitter api TWITTER4J library used
 
 For interval _Thread.sleep(INTERVAL);_  method used
 
+!! With this simple project you can download all tweets of a user in database and do analyses (this can be used for Data mining).
+
 (Android Studio 2.3.3 IDE and PLSQL DEVELOPER 12.0.4 tools had been used while working on this project)
